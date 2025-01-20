@@ -21,11 +21,12 @@ class SearchPhotoCollectionViewCell: BaseCollectionViewCell {
         super.init(frame: frame)
         configureView()
     }
-//    func configureData(item: itemDetail) {
-//        let url = URL(string: item.image)
-//        itemImage.kf.setImage(with: url)
-//        
-//    }
+    func configureData(item: Photo) {
+        let url = URL(string: item.urls.raw)
+        itemImage.kf.setImage(with: url)
+        starCount.text = configString.stringToSet.setStarCount(input: item.likes)
+        
+    }
     override func configureHierachy() {
         contentView.addSubview(itemImage)
         contentView.addSubview(starCount)
@@ -34,7 +35,7 @@ class SearchPhotoCollectionViewCell: BaseCollectionViewCell {
     override func configureLayout() {
         itemImage.snp.makeConstraints { make in
             make.top.horizontalEdges.equalToSuperview()
-            make.height.equalTo(self.snp.width)
+            make.size.equalToSuperview()
             make.centerX.equalToSuperview()
         }
         starCount.snp.makeConstraints { make in
@@ -42,15 +43,17 @@ class SearchPhotoCollectionViewCell: BaseCollectionViewCell {
         }
     }
     override func configureView() {
-        itemImage.layer.cornerRadius = 8
-        itemImage.clipsToBounds = true
+        itemImage.contentMode = .scaleToFill
         
         starCount.textColor = .white
         starCount.font = UIFont.systemFont(ofSize: 12)
         starCount.textAlignment = .center
         starCount.backgroundColor = .gray
-        starCount.layer.cornerRadius = starCount.frame.height / 2
-        starCount.clipsToBounds = true
+        
+        DispatchQueue.main.async {
+            self.starCount.layer.cornerRadius = self.starCount.frame.height / 2
+            self.starCount.clipsToBounds = true
+        }
         
     }
     
