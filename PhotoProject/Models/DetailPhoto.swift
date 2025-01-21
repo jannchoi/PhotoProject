@@ -14,7 +14,13 @@ struct DetailPhoto: Decodable {
 }
 struct Downloads: Decodable {
     let total: Int
+    //let historical : Values
+}
+struct Values: Decodable {
+    let date : String
+    let value : Int
 }
 struct Views: Decodable {
     let total: Int
+    //let historical : Values
 }

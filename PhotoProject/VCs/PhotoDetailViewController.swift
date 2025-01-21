@@ -26,10 +26,10 @@ class PhotoDetailViewController: UIViewController {
     
     func loadData() {
         if let imageId {
-            NetworkManager.shared.detailCallRequest(id: imageId) { value in
+            NetworkManager.shared.callRequest(api: .detail(id: imageId)) { (value: DetailPhoto) in
                 self.mainView.views.text = NumberFormatter.formatter.formatString(value: value.views.total)
                 self.mainView.downloads.text = NumberFormatter.formatter.formatString(value: value.downloads.total)
-            }
+            } failHandler: { }
         }
         
     }

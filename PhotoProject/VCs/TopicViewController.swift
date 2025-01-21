@@ -41,28 +41,46 @@ class TopicViewController: UIViewController {
     }
     func getRandomTopic() {
         print(#function)
-        NetworkManager.shared.topicListCallRequest { topicInfo in
+        NetworkManager.shared.callRequest(api: .topicList) { (topicInfo: [TopicInfo])  in
             let shuffledList = topicInfo.shuffled()
             self.topicList.removeAll()
             self.topicList.append(contentsOf: shuffledList[0...2])
             self.loadData()
+        } failHandler: {
+            
         }
     }
     func loadData() {
+        let group = DispatchGroup()
         
-        NetworkManager.shared.topicCallRequest(id: topicList[0].id) { PhotoList in
-            self.firstList = PhotoList
+        group.enter()
+        NetworkManager.shared.callRequest(api: .topicPhoto(id: topicList[0].id)) { (photo : [TopicPhoto]) in
+            self.firstList = photo
+            group.leave()
+        } failHandler: {
+            group.leave()
+        }
+        
+        group.enter()
+        NetworkManager.shared.callRequest(api: .topicPhoto(id: topicList[1].id)) { (photo : [TopicPhoto]) in
+            self.secondList = photo
+            group.leave()
+        } failHandler: {
+            group.leave()
+        }
+        group.enter()
+        NetworkManager.shared.callRequest(api: .topicPhoto(id: topicList[2].id)) { (photo : [TopicPhoto]) in
+            self.thirdList = photo
+            group.leave()
+        } failHandler: {
+            group.leave()
+        }
+
+        group.notify(queue: .main) {
             self.setView(stackView: self.mainView.firstStackView, list: self.firstList)
             self.mainView.firstLabel.text = self.topicList[0].title
-        }
-        
-        NetworkManager.shared.topicCallRequest(id: topicList[1].id) { PhotoList in
-            self.secondList = PhotoList
             self.setView(stackView: self.mainView.secondStackView, list: self.secondList)
             self.mainView.secondLabel.text = self.topicList[1].title
-        }
-        NetworkManager.shared.topicCallRequest(id: topicList[2].id) { PhotoList in
-            self.thirdList = PhotoList
             self.setView(stackView: self.mainView.thirdStackView, list: self.thirdList)
             self.mainView.thirdLabel.text = self.topicList[2].title
         }
@@ -73,7 +91,7 @@ class TopicViewController: UIViewController {
         
         for i in 0...9{
             let tempImg = stackView.arrangedSubviews[i] as! UIImageView
-            let url = URL(string: list[i].urls.raw)
+            let url = URL(string: list[i].urls.thumb)
             tempImg.kf.setImage(with: url)
             let tapGesture = UITapGestureRecognizer(target: self,
                                                     action: #selector(imageTapped))
@@ -108,7 +126,7 @@ class TopicViewController: UIViewController {
         }
         vc.imageId = item.id
 
-        let url = URL(string: item.urls.raw)
+        let url = URL(string: item.urls.thumb)
         vc.mainView.mainImage.kf.setImage(with: url)
         vc.mainView.photoSize.text = configString.stringToSet.setSize(height: item.height, width: item.width)
         

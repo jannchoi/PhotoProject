@@ -20,6 +20,6 @@ struct Photo: Decodable {
     let likes: Int
 }
 struct URLS: Decodable {
-    let raw : String
+    let thumb : String
 }
 

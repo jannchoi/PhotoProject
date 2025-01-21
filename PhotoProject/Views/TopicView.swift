@@ -8,6 +8,7 @@
 import UIKit
 import SnapKit
 
+
 class TopicView: BaseView {
     let verticalScrollView = UIScrollView()
     

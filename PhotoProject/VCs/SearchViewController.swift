@@ -75,8 +75,7 @@ class SearchViewController: UIViewController {
     }
     
     func loadData(query: String, sort: String = "relevant", color: String? = nil ) {
-        NetworkManager.shared.searchPhotocallRequest(query: query, sort: sort,color: color, page: page) { value in
-            
+        NetworkManager.shared.callRequest(api: .searchPhoto(query: query, sort: "relevant", color: color, page: page)) { (value: PhotoList) in
             if value.results.isEmpty {
                 self.mainView.centerLabel.text = "검색 결과가 없어요."
                 self.mainView.collectionView.isHidden = true
@@ -91,8 +90,8 @@ class SearchViewController: UIViewController {
                 self.isEnd = true
             }
             self.mainView.collectionView.reloadData()
-            
-        }
+        } failHandler: { }
+
     }
     @objc
     func switchChanged(_ sender: UISwitch) {
@@ -154,7 +153,7 @@ extension SearchViewController: UICollectionViewDelegate, UICollectionViewDataSo
         let item = photoInfo[indexPath.item]
         
         vc.imageId = item.id
-        let url = URL(string: item.urls.raw)
+        let url = URL(string: item.urls.thumb)
         vc.mainView.mainImage.kf.setImage(with: url)
         vc.mainView.photoSize.text = configString.stringToSet.setSize(height: item.height, width: item.width)
         

@@ -22,7 +22,7 @@ class SearchPhotoCollectionViewCell: BaseCollectionViewCell {
         configureView()
     }
     func configureData(item: Photo) {
-        let url = URL(string: item.urls.raw)
+        let url = URL(string: item.urls.thumb)
         itemImage.kf.setImage(with: url)
         starCount.text = configString.stringToSet.setStarCount(input: item.likes)
         

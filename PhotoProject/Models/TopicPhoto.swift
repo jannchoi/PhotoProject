@@ -17,7 +17,7 @@ struct TopicPhoto: Decodable {
 }
 
 struct Urls: Decodable {
-    let raw: String
+    let thumb: String
 }
 
 struct TopicInfo: Decodable {
