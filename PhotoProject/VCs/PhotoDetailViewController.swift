@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Charts
 
 class PhotoDetailViewController: UIViewController {
 
@@ -26,9 +27,18 @@ class PhotoDetailViewController: UIViewController {
     
     func loadData() {
         if let imageId {
-            NetworkManager.shared.callRequest(api: .detail(id: imageId)) { (value: DetailPhoto) in
-                self.mainView.views.text = NumberFormatter.formatter.formatString(value: value.views.total)
-                self.mainView.downloads.text = NumberFormatter.formatter.formatString(value: value.downloads.total)
+            NetworkManager.shared.callRequest(api: .detail(id: imageId),model: DetailPhoto.self) {value in
+                switch value {
+                case .success(let data) :
+                    if let result = data as? DetailPhoto{
+                        self.mainView.views.text = NumberFormatter.formatter.formatString(value: result.views.total)
+                        self.mainView.downloads.text = NumberFormatter.formatter.formatString(value: result.downloads.total)
+                    }
+                default :
+                    self.showAlert(text: value.errorMessage, button: nil)
+                        
+                }
+
             } failHandler: { }
         }
         

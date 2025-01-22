@@ -75,21 +75,29 @@ class SearchViewController: UIViewController {
     }
     
     func loadData(query: String, sort: String = "relevant", color: String? = nil ) {
-        NetworkManager.shared.callRequest(api: .searchPhoto(query: query, sort: "relevant", color: color, page: page)) { (value: PhotoList) in
-            if value.results.isEmpty {
-                self.mainView.centerLabel.text = "검색 결과가 없어요."
-                self.mainView.collectionView.isHidden = true
+        NetworkManager.shared.callRequest(api: .searchPhoto(query: query, sort: "relevant", color: color, page: page), model: PhotoList.self) { value in
+            switch value  {
+            case .success(let data) :
+                if let result = data as? PhotoList {
+                    if result.results.isEmpty {
+                        self.mainView.centerLabel.text = "검색 결과가 없어요."
+                        self.mainView.collectionView.isHidden = true
+                    }
+                    if self.page == 1{
+                        self.photoInfo = result.results
+                    } else {
+                        self.photoInfo.append(contentsOf: result.results)
+                    }
+                    self.photoInfo = result.results
+                    if self.page * 20 >= result.total {
+                        self.isEnd = true
+                    }
+                    self.mainView.collectionView.reloadData()
+                }
+            default :
+                self.showAlert(text: value.errorMessage, button: nil)
             }
-            if self.page == 1{
-                self.photoInfo = value.results
-            } else {
-                self.photoInfo.append(contentsOf: value.results)
-            }
-            self.photoInfo = value.results
-            if self.page * 20 >= value.total {
-                self.isEnd = true
-            }
-            self.mainView.collectionView.reloadData()
+
         } failHandler: { }
 
     }

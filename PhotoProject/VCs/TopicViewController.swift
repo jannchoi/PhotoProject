@@ -41,36 +41,67 @@ class TopicViewController: UIViewController {
     }
     func getRandomTopic() {
         print(#function)
-        NetworkManager.shared.callRequest(api: .topicList) { (topicInfo: [TopicInfo])  in
-            let shuffledList = topicInfo.shuffled()
-            self.topicList.removeAll()
-            self.topicList.append(contentsOf: shuffledList[0...2])
-            self.loadData()
+        NetworkManager.shared.callRequest(api: .topicList, model: [TopicInfo].self) { value  in
+            switch value {
+            case .success(let data) :
+                if let result = data as? [TopicInfo] {
+                    let shuffledList = result.shuffled()
+                    self.topicList.removeAll()
+                    self.topicList.append(contentsOf: shuffledList[0...2])
+                    self.loadData()
+                }
+            default:
+                self.showAlert(text: value.errorMessage, button: nil)
+            }
+
         } failHandler: {
             
         }
+
     }
+    
     func loadData() {
         let group = DispatchGroup()
         
         group.enter()
-        NetworkManager.shared.callRequest(api: .topicPhoto(id: topicList[0].id)) { (photo : [TopicPhoto]) in
-            self.firstList = photo
+        NetworkManager.shared.callRequest(api: .topicPhoto(id: topicList[0].id), model: [TopicPhoto].self) { value in
+            switch value {
+            case .success(let data) :
+                if let result = data as? [TopicPhoto] {
+                    self.firstList = result
+                }
+            default :
+                self.showAlert(text: value.errorMessage, button: nil)
+            }
             group.leave()
         } failHandler: {
             group.leave()
         }
         
         group.enter()
-        NetworkManager.shared.callRequest(api: .topicPhoto(id: topicList[1].id)) { (photo : [TopicPhoto]) in
-            self.secondList = photo
+        NetworkManager.shared.callRequest(api: .topicPhoto(id: topicList[1].id), model: [TopicPhoto].self) { value in
+            switch value {
+            case .success(let data) :
+                if let result = data as? [TopicPhoto] {
+                    self.secondList = result
+                }
+            default :
+                self.showAlert(text: value.errorMessage, button: nil)
+            }
             group.leave()
         } failHandler: {
             group.leave()
         }
         group.enter()
-        NetworkManager.shared.callRequest(api: .topicPhoto(id: topicList[2].id)) { (photo : [TopicPhoto]) in
-            self.thirdList = photo
+        NetworkManager.shared.callRequest(api: .topicPhoto(id: topicList[2].id), model: [TopicPhoto].self) { value in
+            switch value {
+            case .success(let data) :
+                if let result = data as? [TopicPhoto] {
+                    self.thirdList = result
+                }
+            default :
+                self.showAlert(text: value.errorMessage, button: nil)
+            }
             group.leave()
         } failHandler: {
             group.leave()
@@ -90,21 +121,28 @@ class TopicViewController: UIViewController {
     func setView(stackView: UIStackView, list: [TopicPhoto]) {
         
         for i in 0...9{
+            let group = DispatchGroup()
+            group.enter()
             let tempImg = stackView.arrangedSubviews[i] as! UIImageView
             let url = URL(string: list[i].urls.thumb)
             tempImg.kf.setImage(with: url)
-            let tapGesture = UITapGestureRecognizer(target: self,
-                                                    action: #selector(imageTapped))
-            tempImg.addGestureRecognizer(tapGesture)
-            tempImg.isUserInteractionEnabled = true
+            group.leave()
             
-            let tempLabel = tempImg.subviews[0] as! UILabel
-            tempLabel.text = configString.stringToSet.setStarCount(input: list[i].likes)
-            
-            DispatchQueue.main.async {
-                tempLabel.layer.cornerRadius = tempLabel.frame.height / 2
-                tempLabel.clipsToBounds = true
+            group.notify(queue: .main) {
+                let tapGesture = UITapGestureRecognizer(target: self,
+                                                        action: #selector(self.imageTapped))
+                tempImg.addGestureRecognizer(tapGesture)
+                tempImg.isUserInteractionEnabled = true
+                
+                let tempLabel = tempImg.subviews[0] as! UILabel
+                tempLabel.text = configString.stringToSet.setStarCount(input: list[i].likes)
+                
+                DispatchQueue.main.async {
+                    tempLabel.layer.cornerRadius = tempLabel.frame.height / 2
+                    tempLabel.clipsToBounds = true
+                }
             }
+
         }
     }
     
@@ -134,3 +172,19 @@ class TopicViewController: UIViewController {
     }
 }
 
+extension UIViewController  {
+    func showAlert(text: String, button: String?,  action: (() -> Void)? = nil) {
+    
+        let alert = UIAlertController(title: "알림", message: text, preferredStyle: .alert)
+        let cancel = UIAlertAction(title: "취소", style: .default)
+        if let action {
+            let button = UIAlertAction(title: button ?? "버튼", style: .default) { _ in
+                action()
+            }
+            alert.addAction(button)
+            
+        }
+        alert.addAction(cancel)
+        present(alert, animated: true)
+    }
+}

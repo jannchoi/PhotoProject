@@ -5,7 +5,7 @@
 //  Created by 최정안 on 1/17/25.
 //
 
-import Foundation
+import UIKit
 import Alamofire
 
 enum UnsplashRequest {
@@ -45,83 +45,59 @@ enum UnsplashRequest {
     }
 }
 
+enum NetworkResult<T> {
+    case success(data: T)
+    case badRequest
+    case unauthorized
+    case forbidden
+    case notFound
+    case otherError
+    
+    var errorMessage : String {
+        switch self {
+        case .success : return "Success"
+        case .badRequest : return "The request was unacceptable, often due to missing a required parameter"
+        case .unauthorized : return "Invalid Access Token"
+        case .forbidden : return "Missing permissions to perform request"
+        case .notFound : return "The requested resource doesn’t exist"
+        default : return "Something wrong.."
+        }
+    }
+}
+
 class NetworkManager {
     
     static let shared = NetworkManager()
     private init() { }
     
     
-    func callRequest<T: Decodable>(api: UnsplashRequest, completionHandler: @escaping(T) -> Void, failHandler: @escaping () ->Void) {
+    func callRequest<T: Decodable>(api: UnsplashRequest,model: T.Type, completionHandler: @escaping(NetworkResult<Any>) -> Void, failHandler: @escaping () ->Void) {
         AF.request(api.endpoint, method: api.method, headers: api.header)
+            .validate(statusCode: 200..<500)
             .responseDecodable(of: T.self) { response in
                 switch response.result {
                 case .success(let value):
-                    completionHandler(value)
+                    guard let statusCode = response.response?.statusCode else {return}
+                    let result = self.defineStatus(statusCode: statusCode, data: value)
+                    completionHandler(result)
                 case .failure(let error):
                     print(error)
+                    
                     failHandler()
                 }
             }
     }
     
-//    func searchPhotocallRequest(query: String, sort: String = "relevant", color: String? = nil, page: Int, completionHandler: @escaping (PhotoList) -> Void) {
-//        var url: String
-//        //URLComponents
-//        if let color {
-//            url = "https://api.unsplash.com/search/photos?query=\(query)&page=\(page)&order_by=\(sort)&per_page=20&color=\(color)"
-//        } else {
-//            url = "https://api.unsplash.com/search/photos?query=\(query)&page=\(page)&order_by=\(sort)&per_page=20"}
-//        
-//        let header: HTTPHeaders = ["Authorization" : APIKey.client_id]
-//        AF.request(url, method: .get, headers: header)
-//            .responseDecodable(of: PhotoList.self) { response in
-//                switch response.result {
-//                case .success(let value):
-//                    completionHandler(value)
-//                case .failure(let error):
-//                    print(error)
-//                }
-//            }
-//    }
-//    
-//    func topicCallRequest(id: String, completionHandler: @escaping ([TopicPhoto]) -> Void) {
-//        let url = "https://api.unsplash.com/topics/\(id)/photos?page=1"
-//        let header: HTTPHeaders = ["Authorization" : APIKey.client_id]
-//        AF.request(url, method: .get, headers: header)
-//            .responseDecodable(of: [TopicPhoto].self) { response in
-//                switch response.result {
-//                case .success(let value):
-//                    completionHandler(value)
-//                case .failure(let error):
-//                    print(error)
-//                }
-//            }
-//        
-//    }
-//    func detailCallRequest(id: String, completionHandler: @escaping (DetailPhoto) -> Void) {
-//        let url = "https://api.unsplash.com/photos/\(id)/statistics?"
-//        let header: HTTPHeaders = ["Authorization" : APIKey.client_id]
-//        AF.request(url, method: .get, headers: header)
-//            .responseDecodable(of: DetailPhoto.self) { response in
-//                switch response.result {
-//                case .success(let value):
-//                    completionHandler(value)
-//                case .failure(let error):
-//                    print(error)
-//                }
-//            }
-//    }
-//    func topicListCallRequest(completionHandler: @escaping ([TopicInfo]) -> Void) {
-//        let url = "https://api.unsplash.com/topics?"
-//        let header: HTTPHeaders = ["Authorization" : APIKey.client_id]
-//        AF.request(url, method: .get, headers: header)
-//            .responseDecodable(of: [TopicInfo].self) { response in
-//                switch response.result {
-//                case .success(let value):
-//                    completionHandler(value)
-//                case .failure(let error):
-//                    print(error)
-//                }
-//            }
-//    }
+    func defineStatus<T: Decodable>(statusCode: Int,data: T) -> NetworkResult<Any> {
+        switch statusCode {
+        case 200 : return .success(data: data)
+        case 400 : return .badRequest
+        case 401 : return .unauthorized
+        case 403 : return .forbidden
+        case 404 : return .notFound
+        default:
+            return .otherError
+        }
+    }
+    
 }
