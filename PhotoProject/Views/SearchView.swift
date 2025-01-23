@@ -15,7 +15,7 @@ class SearchView: BaseView {
     let sortSwitch = UISwitch()
     let centerLabel = UILabel()
     
-    let colorScrollView = UIScrollView()
+    private let colorScrollView = UIScrollView()
     let colorStack = UIStackView()
     
     let colorMap: [Int: String] = [
@@ -27,6 +27,17 @@ class SearchView: BaseView {
         6: "green",
         7: "blue"
     ]
+    
+    private let UIcolorMap: [String : UIColor] = [
+        "black": .black,
+        "white" : .white,
+        "yellow": .yellow,
+        "red": .red,
+        "purple" : .purple,
+        "green" : .systemGreen,
+        "blue" : .blue
+    ]
+    
     
     func createCollectionViewLayout() -> UICollectionViewLayout {
         let layout = UICollectionViewFlowLayout()
@@ -68,7 +79,7 @@ class SearchView: BaseView {
         }
         colorStack.snp.makeConstraints { make in
             make.edges.equalTo(colorScrollView)
-            make.height.equalTo(sortSwitch)
+            make.height.equalTo(sortSwitch) // 수평 스크롤을 위해 height를 지정
         }
         centerLabel.snp.makeConstraints { make in
             make.center.equalTo(safeAreaLayoutGuide)
@@ -99,6 +110,8 @@ class SearchView: BaseView {
                 button.setTitle("None", for: .normal)
             }else {
                 button.setTitle(colorMap[i], for: .normal)
+                button.setImage(UIImage(systemName: "circle.fill"), for: .normal)
+                button.tintColor = UIcolorMap[colorMap[i]!]
             }
             button.setTitleColor(.black, for: .normal)
             button.backgroundColor = .systemGray6

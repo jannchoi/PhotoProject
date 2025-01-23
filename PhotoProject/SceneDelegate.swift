@@ -22,6 +22,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let topicVC = TopicViewController()
         let searchVC = SearchViewController()
         
+        
         let topicNav = UINavigationController(rootViewController: topicVC)
         let searchNav = UINavigationController(rootViewController: searchVC)
         

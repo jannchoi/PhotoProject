@@ -8,20 +8,20 @@
 import UIKit
 import Kingfisher
 
-class SearchViewController: UIViewController {
+final class SearchViewController: UIViewController {
 
-    let mainView = SearchView()
+    private let mainView = SearchView()
     
     override func loadView() {
         view = mainView
     }
     
-    var page = 1
-    var photoInfo = [Photo]()
-    var inputText = ""
-    var isEnd = false
-    var selectedSort = "relevant"
-    var selectedButtonColor : String? = nil
+    private var page = 1
+    private var photoInfo = [Photo]()
+    private var inputText = ""
+    private var isEnd = false
+    private var selectedSort = "relevant"
+    private var selectedButtonColor : String? = nil
     
     
     override func viewDidLoad() {
@@ -78,27 +78,28 @@ class SearchViewController: UIViewController {
         NetworkManager.shared.callRequest(api: .searchPhoto(query: query, sort: "relevant", color: color, page: page), model: PhotoList.self) { value in
             switch value  {
             case .success(let data) :
-                if let result = data as? PhotoList {
-                    if result.results.isEmpty {
+                    if data.results.isEmpty {
                         self.mainView.centerLabel.text = "검색 결과가 없어요."
                         self.mainView.collectionView.isHidden = true
                     }
                     if self.page == 1{
-                        self.photoInfo = result.results
+                        self.photoInfo = data.results
                     } else {
-                        self.photoInfo.append(contentsOf: result.results)
+                        self.photoInfo.append(contentsOf: data.results)
                     }
-                    self.photoInfo = result.results
-                    if self.page * 20 >= result.total {
+                    self.photoInfo = data.results
+                    if self.page * 20 >= data.total {
                         self.isEnd = true
                     }
+                
                     self.mainView.collectionView.reloadData()
-                }
             default :
                 self.showAlert(text: value.errorMessage, button: nil)
             }
 
-        } failHandler: { }
+        } failHandler: { error in
+            self.showAlert(text: error, button: nil)
+        }
 
     }
     @objc

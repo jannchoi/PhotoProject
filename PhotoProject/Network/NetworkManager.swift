@@ -71,7 +71,7 @@ class NetworkManager {
     private init() { }
     
     
-    func callRequest<T: Decodable>(api: UnsplashRequest,model: T.Type, completionHandler: @escaping(NetworkResult<Any>) -> Void, failHandler: @escaping () ->Void) {
+    func callRequest<T: Decodable>(api: UnsplashRequest,model: T.Type, completionHandler: @escaping(NetworkResult<T>) -> Void, failHandler: @escaping (String) ->Void) {
         AF.request(api.endpoint, method: api.method, headers: api.header)
             .validate(statusCode: 200..<500)
             .responseDecodable(of: T.self) { response in
@@ -81,14 +81,13 @@ class NetworkManager {
                     let result = self.defineStatus(statusCode: statusCode, data: value)
                     completionHandler(result)
                 case .failure(let error):
+                    failHandler("Something Wrong")
                     print(error)
-                    
-                    failHandler()
                 }
             }
     }
     
-    func defineStatus<T: Decodable>(statusCode: Int,data: T) -> NetworkResult<Any> {
+    func defineStatus<T: Decodable>(statusCode: Int,data: T) -> NetworkResult<T> {
         switch statusCode {
         case 200 : return .success(data: data)
         case 400 : return .badRequest

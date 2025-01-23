@@ -15,15 +15,15 @@ class TopicView: BaseView {
     let mainLabel = UILabel()
     
     let firstLabel = UILabel()
-    let firstScrollView = UIScrollView()
+    private let firstScrollView = UIScrollView()
     let firstStackView = UIStackView()
     
     let secondLabel = UILabel()
-    let secondScrollView = UIScrollView()
+    private let secondScrollView = UIScrollView()
     let secondStackView = UIStackView()
     
     let thirdLabel = UILabel()
-    let thirdScrollView = UIScrollView()
+    private let thirdScrollView = UIScrollView()
     let thirdStackView = UIStackView()
     
     
@@ -89,7 +89,7 @@ class TopicView: BaseView {
             make.top.equalTo(thirdLabel.snp.bottom).offset(8)
             make.height.equalTo(200)
             make.horizontalEdges.equalTo(safeAreaLayoutGuide).inset(10)
-            make.bottom.equalToSuperview()
+            make.bottom.equalToSuperview() //*
         }
         thirdStackView.snp.makeConstraints { make in
             make.edges.equalTo(thirdScrollView)

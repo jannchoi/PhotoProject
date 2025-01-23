@@ -8,13 +8,13 @@
 import UIKit
 import Charts
 
-class PhotoDetailViewController: UIViewController {
+final class PhotoDetailViewController: UIViewController {
 
     let mainView = DetailView()
     var imageId: String?
-    var imgURL: String?
-    var height: Int?
-    var width: Int?
+    private var imgURL: String?
+    private var height: Int?
+    private var width: Int?
     
     override func loadView() {
         view = mainView
@@ -27,19 +27,17 @@ class PhotoDetailViewController: UIViewController {
     
     func loadData() {
         if let imageId {
-            NetworkManager.shared.callRequest(api: .detail(id: imageId),model: DetailPhoto.self) {value in
+            NetworkManager.shared.callRequest(api: .detail(id: imageId), model: DetailPhoto.self) {value in
                 switch value {
                 case .success(let data) :
-                    if let result = data as? DetailPhoto{
-                        self.mainView.views.text = NumberFormatter.formatter.formatString(value: result.views.total)
-                        self.mainView.downloads.text = NumberFormatter.formatter.formatString(value: result.downloads.total)
-                    }
+                        self.mainView.views.text = NumberFormatter.formatter.formatString(value: data.views.total)
+                        self.mainView.downloads.text = NumberFormatter.formatter.formatString(value: data.downloads.total)
                 default :
                     self.showAlert(text: value.errorMessage, button: nil)
-                        
                 }
-
-            } failHandler: { }
+            } failHandler: { error in
+                self.showAlert(text: error, button: nil)
+            }
         }
         
     }

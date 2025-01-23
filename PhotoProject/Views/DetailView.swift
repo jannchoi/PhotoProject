@@ -9,8 +9,8 @@ import UIKit
 import SnapKit
 
 class DetailView: BaseView {
-    let scrollView = UIScrollView()
-    let contentView = UIView()
+    private let scrollView = UIScrollView()
+    private let contentView = UIView()
     
     let mainImage = UIImageView()
     let infoLabel = UILabel()

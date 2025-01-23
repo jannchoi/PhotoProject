@@ -8,18 +8,17 @@
 import UIKit
 import Kingfisher
 
-class TopicViewController: UIViewController {
+final class TopicViewController: UIViewController {
 
-    let mainView = TopicView()
+    private let mainView = TopicView()
     
-    var firstList = [TopicPhoto]()
-    var secondList = [TopicPhoto]()
-    var thirdList = [TopicPhoto]()
+    private var firstList = [TopicPhoto]()
+    private var secondList = [TopicPhoto]()
+    private var thirdList = [TopicPhoto]()
     
-    var topicList = [TopicInfo]()
+    private var topicList = [TopicInfo]()
     
-    var quit = false
-    var timer = 0
+    private var quit = false
     
     override func loadView() {
         view = mainView
@@ -44,17 +43,16 @@ class TopicViewController: UIViewController {
         NetworkManager.shared.callRequest(api: .topicList, model: [TopicInfo].self) { value  in
             switch value {
             case .success(let data) :
-                if let result = data as? [TopicInfo] {
-                    let shuffledList = result.shuffled()
+                    let shuffledList = data.shuffled()
                     self.topicList.removeAll()
                     self.topicList.append(contentsOf: shuffledList[0...2])
                     self.loadData()
-                }
             default:
                 self.showAlert(text: value.errorMessage, button: nil)
             }
 
-        } failHandler: {
+        } failHandler: { error in
+            self.showAlert(text: error, button: nil)
             
         }
 
@@ -67,14 +65,13 @@ class TopicViewController: UIViewController {
         NetworkManager.shared.callRequest(api: .topicPhoto(id: topicList[0].id), model: [TopicPhoto].self) { value in
             switch value {
             case .success(let data) :
-                if let result = data as? [TopicPhoto] {
-                    self.firstList = result
-                }
+                    self.firstList = data
             default :
                 self.showAlert(text: value.errorMessage, button: nil)
             }
             group.leave()
-        } failHandler: {
+        } failHandler: { error in
+            self.showAlert(text: error, button: nil)
             group.leave()
         }
         
@@ -82,28 +79,26 @@ class TopicViewController: UIViewController {
         NetworkManager.shared.callRequest(api: .topicPhoto(id: topicList[1].id), model: [TopicPhoto].self) { value in
             switch value {
             case .success(let data) :
-                if let result = data as? [TopicPhoto] {
-                    self.secondList = result
-                }
+                    self.secondList = data
             default :
                 self.showAlert(text: value.errorMessage, button: nil)
             }
             group.leave()
-        } failHandler: {
+        } failHandler: { error in
+            self.showAlert(text: error, button: nil)
             group.leave()
         }
         group.enter()
         NetworkManager.shared.callRequest(api: .topicPhoto(id: topicList[2].id), model: [TopicPhoto].self) { value in
             switch value {
             case .success(let data) :
-                if let result = data as? [TopicPhoto] {
-                    self.thirdList = result
-                }
+                    self.thirdList = data
             default :
                 self.showAlert(text: value.errorMessage, button: nil)
             }
             group.leave()
-        } failHandler: {
+        } failHandler: { error in
+            self.showAlert(text: error, button: nil)
             group.leave()
         }
 
