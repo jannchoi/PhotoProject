@@ -6,15 +6,13 @@
 //
 
 import UIKit
-import Charts
+import Kingfisher
+
 
 final class PhotoDetailViewController: UIViewController {
 
     let mainView = DetailView()
-    var imageId: String?
-    private var imgURL: String?
-    private var height: Int?
-    private var width: Int?
+    let viewModel = PhotoDetailViewModel()
     
     override func loadView() {
         view = mainView
@@ -22,24 +20,35 @@ final class PhotoDetailViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         mainView.backgroundColor = .white
-        loadData()
+        bindData()
+        
+
     }
-    
-    func loadData() {
-        if let imageId {
-            NetworkManager.shared.callRequest(api: .detail(id: imageId), model: DetailPhoto.self) {value in
-                switch value {
-                case .success(let data) :
-                        self.mainView.views.text = NumberFormatter.formatter.formatString(value: data.views.total)
-                        self.mainView.downloads.text = NumberFormatter.formatter.formatString(value: data.downloads.total)
-                default :
-                    self.showAlert(text: value.errorMessage, button: nil)
-                }
-            } failHandler: { error in
-                self.showAlert(text: error, button: nil)
-            }
+    func bindData() {
+        
+        viewModel.output.photosize.lazyBind { text in
+            guard let text else {return}
+            self.mainView.photoSize.text = text
+        }
+
+        viewModel.output.imageURL.bind { url in
+            guard let url else {return}
+            self.mainView.mainImage.kf.setImage(with: url)
+        }
+        
+        viewModel.output.viewTotal.lazyBind { text in
+            guard let text else {return}
+            self.mainView.views.text = text
+        }
+        viewModel.output.downloads.lazyBind { text in
+            guard let text else {return}
+            self.mainView.downloads.text = text
+        }
+        viewModel.output.errorMessage.lazyBind { message in
+            self.showAlert(text: message, button: nil)
         }
         
     }
+    
 
 }

@@ -161,11 +161,7 @@ extension SearchViewController: UICollectionViewDelegate, UICollectionViewDataSo
         let vc = PhotoDetailViewController()
         let item = photoInfo[indexPath.item]
         
-        vc.imageId = item.id
-        let url = URL(string: item.urls.thumb)
-        vc.mainView.mainImage.kf.setImage(with: url)
-        vc.mainView.photoSize.text = configString.stringToSet.setSize(height: item.height, width: item.width)
-        
+        vc.viewModel.input.topicPhoto.value = item
         navigationController?.pushViewController(vc, animated: true)
     }
     

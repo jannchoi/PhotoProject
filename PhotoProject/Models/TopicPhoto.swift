@@ -6,20 +6,6 @@
 //
 
 import Foundation
-
-
-struct TopicPhoto: Decodable {
-    let id: String
-    let width: Int
-    let height: Int
-    let urls: Urls
-    let likes: Int
-}
-
-struct Urls: Decodable {
-    let thumb: String
-}
-
 struct TopicInfo: Decodable {
     let id: String
     let title: String

@@ -12,9 +12,9 @@ final class TopicViewController: UIViewController {
 
     private let mainView = TopicView()
     
-    private var firstList = [TopicPhoto]()
-    private var secondList = [TopicPhoto]()
-    private var thirdList = [TopicPhoto]()
+    private var firstList = [Photo]()
+    private var secondList = [Photo]()
+    private var thirdList = [Photo]()
     
     private var topicList = [TopicInfo]()
     
@@ -62,7 +62,7 @@ final class TopicViewController: UIViewController {
         let group = DispatchGroup()
         
         group.enter()
-        NetworkManager.shared.callRequest(api: .topicPhoto(id: topicList[0].id), model: [TopicPhoto].self) { value in
+        NetworkManager.shared.callRequest(api: .topicPhoto(id: topicList[0].id), model: [Photo].self) { value in
             switch value {
             case .success(let data) :
                     self.firstList = data
@@ -76,7 +76,7 @@ final class TopicViewController: UIViewController {
         }
         
         group.enter()
-        NetworkManager.shared.callRequest(api: .topicPhoto(id: topicList[1].id), model: [TopicPhoto].self) { value in
+        NetworkManager.shared.callRequest(api: .topicPhoto(id: topicList[1].id), model: [Photo].self) { value in
             switch value {
             case .success(let data) :
                     self.secondList = data
@@ -89,7 +89,7 @@ final class TopicViewController: UIViewController {
             group.leave()
         }
         group.enter()
-        NetworkManager.shared.callRequest(api: .topicPhoto(id: topicList[2].id), model: [TopicPhoto].self) { value in
+        NetworkManager.shared.callRequest(api: .topicPhoto(id: topicList[2].id), model: [Photo].self) { value in
             switch value {
             case .success(let data) :
                     self.thirdList = data
@@ -113,7 +113,7 @@ final class TopicViewController: UIViewController {
         
     }
 
-    func setView(stackView: UIStackView, list: [TopicPhoto]) {
+    func setView(stackView: UIStackView, list: [Photo]) {
         
         for i in 0...9{
             let group = DispatchGroup()
@@ -146,7 +146,7 @@ final class TopicViewController: UIViewController {
         let vc = PhotoDetailViewController()
         
         let targetView = sender.view as! UIImageView
-        var item : TopicPhoto
+        var item : Photo
         
         if targetView.tag / 10 == 0 {
             item = firstList[targetView.tag % 10]
@@ -157,12 +157,7 @@ final class TopicViewController: UIViewController {
         } else {
             item = thirdList[targetView.tag % 10]
         }
-        vc.imageId = item.id
-
-        let url = URL(string: item.urls.thumb)
-        vc.mainView.mainImage.kf.setImage(with: url)
-        vc.mainView.photoSize.text = configString.stringToSet.setSize(height: item.height, width: item.width)
-        
+        vc.viewModel.input.topicPhoto.value = item
         navigationController?.pushViewController(vc, animated: true)
     }
 }
